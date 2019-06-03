@@ -23,7 +23,7 @@ plot(spdf)
 gen_file <- str_replace(shp_file, ".shp", ".gen")
 id_file <- str_replace(shp_file, ".shp", ".id")
 
-# Remove equally named .gen file and .id file. ###############################
+# Remove existing .gen file and .id file. ####################################
 if (file.exists(gen_file)) {
   file.remove(gen_file)
 }
@@ -63,5 +63,5 @@ lapply(seq_along(spdf@polygons), function(mp_index) {
 })
 cat("END\n", file = gen_file, append = TRUE)
 
-# Remove all variables created by this 
+# Remove all variables created by this script.
 rm(gen_file, id, id_col, id_file, shp_file, spdf)
