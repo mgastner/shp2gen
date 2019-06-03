@@ -48,11 +48,12 @@ for (i in seq_along(spdf@polygons)) {  # Loop over multipolygons.
         file = gen_file,
         sep = "",
         append = TRUE)
-    for (k in seq_len(nrow(coords))) {
-      cat(coords[k, ], "\n",
-          file = gen_file,
-          append = TRUE)
-    }
+    sapply(seq_len(nrow(coords)),
+           function(k) {
+             cat(coords[k, ], "\n",
+                 file = gen_file,
+                 append = TRUE)
+           })
     cat("END\n", file = gen_file, append = TRUE)
   }
 }
