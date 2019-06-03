@@ -1,19 +1,23 @@
 # Script to import a shape file (with extension .shp) and export a file in   #
 # ArcInfo generate format (with extension .gen). The script also exports a   #
 # file (with extension .id) that matches region IDs in the database file     #
-# (with extension .dbf) to the numeric IDs in the .gen file.                 #
-# Before running this script, change the file path to the .shp and check the #
-# .dbf file for a column name that contains identifying names for the        #
-# regions. Edit the corresponding lines below marked by arrows in the        #
-# comments.                                                                  #
+# (with extension .dbf) to the numeric IDs in the .gen file. Before running  #
+# this script:                                                               #
+# - change the file path to the .shp file,                                   #
+# - check the .dbf file for a column name that contains identifying names    #
+#   for the regions,                                                         #
+# - choose an appropriate projection.                                        #
+# Edit the corresponding lines below marked by arrows in the comments.       #
 
 library(rgdal)
 library(tidyverse)
 
 # Read the shape file. The result is a SpatialPolygonsDataFrame. #############
 shp_file <- "iceland/gadm36_ISL_1.shp"  # <------- Change file path as needed.
-spdf <- readOGR(shp_file)
 id_col <- "NAME_1"  # <--- Change to column name in .dbf file with region IDs.
+spdf <- readOGR(shp_file) %>%
+  spTransform(CRSobj = "+init=epsg:5325")  # <--- Change projection as needed.
+plot(spdf)
 
 # Automatically give names to the .gen and .id file. #########################
 gen_file <- str_replace(shp_file, ".shp", ".gen")
