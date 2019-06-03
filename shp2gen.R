@@ -33,29 +33,35 @@ if (file.exists(id_file)) {
 
 # Write to .gen and .id files. ###############################################
 id <- as.character(spdf@data[[id_col]])  # IDs in .dbf.
-for (i in seq_along(spdf@polygons)) {  # Loop over multipolygons.
-  cat(i, " ", id[i], "\n",
+
+# Loop over multipolygons.
+lapply(seq_along(spdf@polygons), function(mp_index) {
+  cat(mp_index, " ", id[mp_index], "\n",
       file = id_file,
       sep = "",
       append = TRUE)
-  polygons <- spdf@polygons[[i]]@Polygons
-  for (j in seq_along(polygons)) {
-    if (polygons[[j]]@hole) {
+  
+  # Loop over polygons inside this multipolygon.
+  lapply(spdf@polygons[[mp_index]]@Polygons, function(polygon) {
+    if (polygon@hole) {
       cat("FYI: hole in region", i, "\n")
     }
-    coords <- polygons[[j]]@coords
-    cat(i, " ", id[i], "\n",
+    coords <- polygon@coords
+    cat(mp_index, " ", id[mp_index], "\n",
         file = gen_file,
         sep = "",
         append = TRUE)
-    sapply(seq_len(nrow(coords)),
-           function(k) {
-             cat(coords[k, ], "\n",
-                 file = gen_file,
-                 append = TRUE)
-           })
+    
+    # Loop over pairs of coordinates in this polygon.
+    lapply(seq_len(nrow(coords)), function(r) {
+      cat(coords[r, ], "\n",
+          file = gen_file,
+          append = TRUE)
+    })
     cat("END\n", file = gen_file, append = TRUE)
-  }
-}
+  })
+})
 cat("END\n", file = gen_file, append = TRUE)
-# REMOVE ALL VARIABLES.
+
+# Remove all variables created by this 
+rm(gen_file, id, id_col, id_file, shp_file, spdf)
