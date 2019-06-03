@@ -38,3 +38,5 @@ rsconnect/
 
 # Addition by Michael T. Gastner
 *.Rproj
+*.gen
+*.id

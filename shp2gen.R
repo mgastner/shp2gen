@@ -1,13 +1,19 @@
-# Script to R import a shape file (with extension .shp) and export a file in #
+# Script to import a shape file (with extension .shp) and export a file in   #
 # ArcInfo generate format (with extension .gen). The script also exports a   #
-# file of region IDs (with extension .id).                                   #
+# file (with extension .id) that matches region IDs in the database file     #
+# (with extension .dbf) to the numeric IDs in the .gen file.                 #
+# Before running this script, change the file path to the .shp and check the #
+# .dbf file for a column name that contains identifying names for the        #
+# regions. Edit the corresponding lines below marked by arrows in the        #
+# comments.                                                                  #
 
 library(rgdal)
 library(tidyverse)
 
 # Read the shape file. The result is a SpatialPolygonsDataFrame. #############
-shp_file <- "canada/gadm36_CAN_1.shp"  # Change file path as needed.
+shp_file <- "iceland/gadm36_ISL_1.shp"  # <------- Change file path as needed.
 spdf <- readOGR(shp_file)
+id_col <- "NAME_1"  # <--- Change to column name in .dbf file with region IDs.
 
 # Automatically give names to the .gen and .id file. #########################
 gen_file <- str_replace(shp_file, ".shp", ".gen")
@@ -21,25 +27,30 @@ if (file.exists(id_file)) {
   file.remove(id_file)
 }
 
-# dt <- area@data
-# for (i in seq_along(area@polygons)) {
-#   cat(i, " ", as.character(dt$NAME_1[i]), "\n", file = id.file,
-#       append = TRUE, sep = "")
-#   aps <- area@polygons[[i]]
-#   if (length(aps) != 1)
-#     stop("length(aps) != 1")
-#   ap <- aps@Polygons
-#   for (j in seq_along(ap)) {
-#     if (ap[[j]]@hole || ap[[j]]@ringDir != 1)
-#       cat("hole in region", i, "\n")
-#     m <- ap[[j]]@coords
-#     cat(i, " ", as.character(dt$NAME_1[i]), "\n", file = gen.file,
-#         append = TRUE, sep = "")
-#     for (k in seq_len(nrow(m))) {
-#       cat(m[k, 1], " ", m[k, 2], "\n", file = gen.file,
-#           append = TRUE, sep = "")
-#     }
-#     cat("END\n", file = gen.file, append = TRUE)
-#   }
-# }
-# cat("END\n", file = gen.file, append = TRUE)
+# Write to .gen and .id files. ###############################################
+id <- as.character(spdf@data[[id_col]])  # IDs in .dbf.
+for (i in seq_along(spdf@polygons)) {  # Loop over multipolygons.
+  cat(i, " ", id[i], "\n",
+      file = id_file,
+      sep = "",
+      append = TRUE)
+  polygons <- spdf@polygons[[i]]@Polygons
+  for (j in seq_along(polygons)) {
+    if (polygons[[j]]@hole) {
+      cat("FYI: hole in region", i, "\n")
+    }
+    coords <- polygons[[j]]@coords
+    cat(i, " ", id[i], "\n",
+        file = gen_file,
+        sep = "",
+        append = TRUE)
+    for (k in seq_len(nrow(coords))) {
+      cat(coords[k, ], "\n",
+          file = gen_file,
+          append = TRUE)
+    }
+    cat("END\n", file = gen_file, append = TRUE)
+  }
+}
+cat("END\n", file = gen_file, append = TRUE)
+# REMOVE ALL VARIABLES.
