@@ -17,6 +17,7 @@ shp_file <- "iceland/gadm36_ISL_1.shp"  # <------- Change file path as needed.
 id_col <- "NAME_1"  # <--- Change to column name in .dbf file with region IDs.
 spdf <- readOGR(shp_file) %>%
   spTransform(CRSobj = "+init=epsg:5325")  # <--- Change projection as needed.
+cat("Plotting map ... (Comment me out if you find me too slow)\n")
 plot(spdf)
 
 # Automatically give names to the .gen and .id file. #########################
@@ -35,7 +36,15 @@ if (file.exists(id_file)) {
 id <- as.character(spdf@data[[id_col]])  # IDs in .dbf.
 
 # Loop over multipolygons.
+cat("Starting the conversion to .gen file ...\n")
 lapply(seq_along(spdf@polygons), function(mp_index) {
+  if (mp_index %% 5 == 0) {
+    cat("Working on region",
+        mp_index,
+        "out of",
+        length(spdf@polygons),
+        "...\n")
+  }
   cat(mp_index, " ", id[mp_index], "\n",
       file = id_file,
       sep = "",
@@ -63,6 +72,7 @@ lapply(seq_along(spdf@polygons), function(mp_index) {
   })
 })
 cat("END\n", file = gen_file, append = TRUE)
+cat("Finished exporting to .gen file\n")
 
 # Remove all variables created by this script.
 rm(gen_file, id, id_col, id_file, shp_file, spdf)
