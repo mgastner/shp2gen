@@ -44,7 +44,8 @@ lapply(seq_along(spdf@polygons), function(mp_index) {
   # Loop over polygons inside this multipolygon.
   lapply(spdf@polygons[[mp_index]]@Polygons, function(polygon) {
     if (polygon@hole) {
-      cat("FYI: hole in region", i, "\n")
+      cat("FYI: hole in region ", mp_index, " (", id[mp_index], ")\n",
+          sep = "")
     }
     coords <- polygon@coords
     cat(mp_index, " ", id[mp_index], "\n",
