@@ -21,8 +21,11 @@ cat("Plotting map ... (Comment me out if you find me too slow)\n")
 plot(spdf)
 
 # Automatically give names to the .gen and .id file. #########################
-gen_file <- str_replace(shp_file, ".shp", ".gen")
-id_file <- str_replace(shp_file, ".shp", ".id")
+if (!str_detect(shp_file, "\\.shp$")) {
+  stop("shp_file must end with .shp")
+}
+gen_file <- str_replace(shp_file, "\\.shp$", ".gen")
+id_file <- str_replace(shp_file, "\\.shp$", ".id")
 
 # Remove existing .gen file and .id file. ####################################
 if (file.exists(gen_file)) {
